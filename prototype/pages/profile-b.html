@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POLYPLAY - 个人中心 (马里奥版)</title>
+    <!-- 引入Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=ZCOOL+KuaiLe&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+    <!-- 引入Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- 引入Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* 马里奥主题色彩变量 */
+        :root {
+            --mario-red: #E52521;
+            --mario-dark-red: #800000;
+            --mario-blue: #049CD8;
+            --mario-dark-blue: #003366;
+            --mario-green: #43B047;
+            --mario-dark-green: #006400;
+            --mario-yellow: #FBD000;
+            --mario-orange: #F37022;
+            --mario-brown: #8C4600;
+            --mario-beige: #FFF1BC;
+            --mario-black: #221E1F;
+            --mario-white: #FFFFFF;
+        }
+
+        /* 动画效果 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes grow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(251, 208, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(251, 208, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 208, 0, 0); }
+        }
+
+        /* 基本样式 */
+        body {
+            font-family: 'ZCOOL QingKe HuangYou', 'ZCOOL KuaiLe', sans-serif;
+            background-color: #89CFFB; /* 马里奥天空背景色 */
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+            background-image: url('https://www.transparenttextures.com/patterns/asfalt-light.png');
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        /* 顶部个人信息卡片 */
+        .profile-header {
+            background: linear-gradient(180deg, var(--mario-red) 0%, var(--mario-dark-red) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-bottom: 6px solid var(--mario-dark-red);
+        }
+
+        .profile-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-top: 25px;
+        }
+
+        .back-button {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+        }
+
+        .settings-button {
+            width: 40px;
+            height: 40px;
+            background-color: var(--mario-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: var(--mario-red);
+            box-shadow: 0 3px 0 var(--mario-orange);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .settings-button:active {
+            transform: translateY(3px);
+            box-shadow: 0 0 0 var(--mario-orange);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid var(--mario-yellow);
+            box-shadow: 0 0 15px rgba(251, 208, 0, 0.5);
+            object-fit: cover;
+            animation: pulse 2s infinite;
+        }
+
+        .profile-name-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-family: 'Bangers', 'ZCOOL KuaiLe', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0 var(--mario-dark-red);
+        }
+
+        .profile-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            padding: 15px 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-size: 0.8rem;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 5px 20px;
+        }
+
+        /* 马里奥装饰元素 */
+        .mario-cloud {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 5px 0 #dddddd;
+            z-index: 1;
+        }
+
+        .mario-cloud::before,
+        .mario-cloud::after {
+            content: '';
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .mario-cloud::before {
+            width: 30px;
+            height: 30px;
+            top: -10px;
+            left: 10px;
+        }
+
+        .mario-cloud::after {
+            width: 30px;
+            height: 30px;
+            top: -8px;
+            left: 25px;
+        }
+
+        .mario-coin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: var(--mario-yellow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px var(--mario-yellow);
+            color: var(--mario-brown);
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: spin 4s infinite linear, float 2s infinite ease-in-out;
+            z-index: 1;
+        }
+
+        /* 内容区域 */
+        .content-container {
+            padding: 20px;
+        }
+
+        .section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 0 var(--mario-blue), 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--mario-blue);
+        }
+
+        .section-title {
+            font-family: 'Bangers', 'ZCOOL KuaiLe', cursive;
+            font-size: 1.5rem;
+            color: var(--mario-dark-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            width: 36px;
+            height: 36px;
+            background-color: var(--mario-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 手环信息部分 */
+        .wristband-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .wristband-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .wristband-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--mario-beige);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--mario-brown);
+            font-size: 1.5rem;
+        }
+
+        .wristband-info {
+            flex: 1;
+        }
+
+        .wristband-label {
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 3px;
+        }
+
+        .wristband-value {
+            font-weight: bold;
+            color: var(--mario-black);
+        }
+
+        .battery-indicator {
+            width: 70px;
+            height: 12px;
+            background-color: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .battery-level {
+            height: 100%;
+            background-color: var(--mario-green);
+            border-radius: 10px;
+        }
+
+        /* 成就部分 */
+        .achievement-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .achievement-item {
+            background-color: var(--mario-beige);
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid var(--mario-yellow);
+            box-shadow: 0 3px 0 var(--mario-orange);
+            transition: transform 0.3s;
+        }
+
+        .achievement-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--mario-yellow);
+            border-radius: 50%;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--mario-red);
+            font-size: 1.2rem;
+        }
+
+        .achievement-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--mario-black);
+        }
+
+        .achievement-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background-color: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--mario-green);
+            border-radius: 4px;
+        }
+
+        /* 历史记录部分 */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-item:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--mario-beige);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: var(--mario-brown);
+            font-size: 1.2rem;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            color: var(--mario-black);
+        }
+
+        .history-time {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .history-points {
+            font-weight: bold;
+            color: var(--mario-green);
+            background-color: rgba(67, 176, 71, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        /* 底部导航栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, var(--mario-red) 0%, var(--mario-dark-red) 100%);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 5px;
+            box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            border-top: 3px solid var(--mario-dark-red);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            gap: 5px;
+            width: 60px;
+            cursor: pointer;
+        }
+
+        .icon-bg {
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active .icon-bg {
+            background-color: var(--mario-yellow);
+            color: var(--mario-dark-red);
+            animation: float 2s infinite ease-in-out;
+        }
+
+        .nav-item.active {
+            position: relative;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--mario-yellow);
+            border-radius: 2px;
+        }
+
+        .nav-item span {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div>16:28</div>
+            <div>
+                <i class="fas fa-signal"></i>
+                <span>5G</span>
+                <i class="fas fa-battery-three-quarters ml-2"></i>
+                <span>78%</span>
+            </div>
+        </div>
+
+        <!-- 马里奥云朵装饰 -->
+        <div class="mario-cloud" style="top: 150px; right: 30px; animation: float 8s infinite ease-in-out;"></div>
+        <div class="mario-cloud" style="top: 250px; left: 20px; animation: float 6s infinite ease-in-out; animation-delay: 1s;"></div>
+        <div class="mario-cloud" style="top: 400px; right: 40px; animation: float 7s infinite ease-in-out; animation-delay: 2s;"></div>
+        
+        <!-- 马里奥金币装饰 -->
+        <div class="mario-coin" style="top: 180px; left: 40px;">$</div>
+        <div class="mario-coin" style="top: 320px; right: 30px; animation-delay: 1s;">$</div>
+        <div class="mario-coin" style="top: 450px; left: 30px; animation-delay: 2s;">$</div>
+
+        <!-- 顶部个人信息卡片 -->
+        <div class="profile-header">
+            <div class="profile-header-top">
+                <a href="#" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <button class="settings-button">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+
+            <div class="profile-info">
+                <img src="https://i.pravatar.cc/150?img=3" alt="用户头像" class="profile-avatar">
+                <div class="profile-name-info">
+                    <h1 class="profile-name">小明</h1>
+                    <p class="profile-subtitle">积极运动的马里奥粉丝</p>
+                </div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-value">245</div>
+                    <div class="stat-label">运动时长</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">完成挑战</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">78</div>
+                    <div class="stat-label">好友数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">8.6</div>
+                    <div class="stat-label">平均评分</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-container">
+            <!-- 手环信息部分 -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-tachometer-alt"></i>
+                    手环信息
+                </h2>
+                <div class="wristband-item">
+                    <div class="wristband-icon">
+                        <i class="fas fa-watch"></i>
+                    </div>
+                    <div class="wristband-info">
+                        <div class="wristband-label">设备型号</div>
+                        <div class="wristband-value">POLY Move Pro (马里奥特别版)</div>
+                    </div>
+                </div>
+                <div class="wristband-item">
+                    <div class="wristband-icon">
+                        <i class="fas fa-battery-half"></i>
+                    </div>
+                    <div class="wristband-info">
+                        <div class="wristband-label">电池电量</div>
+                        <div class="wristband-value">78%</div>
+                        <div class="battery-indicator">
+                            <div class="battery-level" style="width: 78%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="wristband-item">
+                    <div class="wristband-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="wristband-info">
+                        <div class="wristband-label">当前心率</div>
+                        <div class="wristband-value">72 bpm (静息)</div>
+                    </div>
+                </div>
+                <div class="wristband-item">
+                    <div class="wristband-icon">
+                        <i class="fas fa-walking"></i>
+                    </div>
+                    <div class="wristband-info">
+                        <div class="wristband-label">今日步数</div>
+                        <div class="wristband-value">8,764 步</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 成就部分 -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-trophy"></i>
+                    成就
+                </h2>
+                <div class="achievement-list">
+                    <div class="achievement-item">
+                        <div class="achievement-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="achievement-title">游戏大师</div>
+                        <div class="achievement-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%;"></div>
+                            </div>
+                            <span>75%</span>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <div class="achievement-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="achievement-title">急速之王</div>
+                        <div class="achievement-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 60%;"></div>
+                            </div>
+                            <span>60%</span>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <div class="achievement-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="achievement-title">社交达人</div>
+                        <div class="achievement-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 90%;"></div>
+                            </div>
+                            <span>90%</span>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <div class="achievement-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="achievement-title">活力满满</div>
+                        <div class="achievement-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%;"></div>
+                            </div>
+                            <span>45%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 历史记录部分 -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i>
+                    历史记录
+                </h2>
+                <div class="history-list">
+                    <div class="history-item">
+                        <div class="history-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="history-info">
+                            <div class="history-title">完成马里奥冒险第三关</div>
+                            <div class="history-time">今天 14:30</div>
+                        </div>
+                        <div class="history-points">+120 分</div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="history-info">
+                            <div class="history-title">完成5公里跑步目标</div>
+                            <div class="history-time">今天 08:15</div>
+                        </div>
+                        <div class="history-points">+85 分</div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="history-info">
+                            <div class="history-title">解锁新成就：10天连续运动</div>
+                            <div class="history-time">昨天 20:45</div>
+                        </div>
+                        <div class="history-points">+200 分</div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <div class="history-info">
+                            <div class="history-title">发布动态：跑步记录</div>
+                            <div class="history-time">前天 16:20</div>
+                        </div>
+                        <div class="history-points">+30 分</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="bottom-nav">
+            <a href="polyplay-b.html" class="nav-item">
+                <div class="icon-bg"><i class="fas fa-gamepad"></i></div>
+                <span>游戏</span>
+            </a>
+            <a href="moments-b.html" class="nav-item">
+                <div class="icon-bg"><i class="fas fa-stream"></i></div>
+                <span>动态</span>
+            </a>
+            <a href="chat-b.html" class="nav-item">
+                <div class="icon-bg"><i class="fas fa-comment-dots"></i></div>
+                <span>聊天</span>
+            </a>
+            <a href="profile-b.html" class="nav-item active">
+                <div class="icon-bg"><i class="fas fa-user"></i></div>
+                <span>我的</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 导航项目悬停效果
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('active')) {
+                    this.querySelector('.icon-bg').style.animation = 'bounce 0.5s';
+                }
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('active')) {
+                    this.querySelector('.icon-bg').style.animation = 'none';
+                }
+            });
+        });
+
+        // 成就项目悬停效果
+        document.querySelectorAll('.achievement-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // 马里奥云朵动画
+        const clouds = document.querySelectorAll('.mario-cloud');
+        clouds.forEach(cloud => {
+            setInterval(() => {
+                cloud.style.transform = `translateX(${Math.sin(Date.now() / 2000) * 15}px)`;
+            }, 100);
+        });
+    </script>
+</body>
+</html> 
+</html> 

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POLYPLAY - 聊天中心 (马里奥版)</title>
+    <!-- 导入Google字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Bangers&display=swap" rel="stylesheet">
+    <!-- 导入Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* 马里奥风格色调色板 */
+            --mario-red: #E52521;
+            --mario-dark-red: #CE000C;
+            --mario-blue: #049CD8;
+            --mario-dark-blue: #0076BC;
+            --mario-green: #43B047;
+            --mario-dark-green: #009444;
+            --mario-yellow: #FBD000;
+            --mario-orange: #F37021;
+            --mario-brown: #8C6239;
+            --mario-black: #221E1F;
+            --mario-white: #FFFFFF;
+            --mario-sky-blue: #5BC3F0;
+            --mario-ground: #8C6239;
+            
+            /* 文本颜色 */
+            --text-primary: #221E1F;
+            --text-secondary: #555555;
+            --text-white: #FFFFFF;
+            
+            /* 背景颜色 */
+            --bg-primary: #5BC3F0; /* 天空蓝色 */
+            --bg-secondary: #FFFFFF;
+            --card-bg: #FFFFFF;
+            
+            /* 阴影 */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes mushroom-grow {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        html, body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            padding-bottom: 80px;
+            padding-top: 0;
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: var(--bg-primary);
+            background-image: url('https://images.unsplash.com/photo-1566694271453-390536dd1f0d?w=500&auto=format&fit=crop');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* 顶部状态栏样式 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            color: white;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 20;
+        }
+        
+        /* 顶部标题区域 */
+        .header-area {
+            background-color: var(--mario-red);
+            padding: 3.5rem 1.2rem 1.5rem;
+            position: relative;
+            border-radius: 0 0 30px 30px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1rem;
+            border-bottom: 6px solid var(--mario-dark-red);
+            overflow: hidden;
+        }
+        
+        .header-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background-color: var(--mario-dark-red);
+        }
+        
+        /* 应用标题 */
+        .app-title {
+            font-family: 'Bangers', cursive;
+            font-weight: 800;
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 0.8rem;
+            text-shadow: 3px 3px 0 var(--mario-dark-red);
+            position: relative;
+            display: inline-block;
+            letter-spacing: 2px;
+        }
+        
+        /* 标签切换 */
+        .tab-container {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 0.3rem;
+            display: flex;
+            margin-top: 1rem;
+            backdrop-filter: blur(5px);
+            border: 3px solid var(--mario-white);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 0.7rem;
+            text-align: center;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            background-color: var(--mario-yellow);
+            color: var(--mario-red);
+            box-shadow: var(--shadow-sm);
+            font-weight: 800;
+            transform: translateY(-2px);
+        }
+        
+        /* 搜索栏 */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 0.6rem 1rem;
+            margin-top: 1rem;
+            backdrop-filter: blur(5px);
+            border: 3px solid var(--mario-white);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            padding: 0.3rem 0;
+        }
+        
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .search-bar i {
+            color: white;
+            margin-right: 0.5rem;
+        }
+        
+        /* 内容区域 */
+        .content-section {
+            padding: 0 1rem;
+        }
+        
+        /* 聊天项目 */
+        .chat-item, .friend-item, .notification-item {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid var(--mario-blue);
+        }
+        
+        .chat-item:hover, .friend-item:hover, .notification-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+            background-color: rgba(4, 156, 216, 0.1);
+        }
+        
+        .chat-item::before, .friend-item::before, .notification-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 6px;
+            background-color: var(--mario-blue);
+        }
+        
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 1rem;
+            position: relative;
+            border: 3px solid var(--mario-white);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .online-indicator {
+            width: 14px;
+            height: 14px;
+            background-color: var(--mario-green);
+            border: 2px solid white;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+        
+        .chat-details, .friend-details, .notification-details {
+            flex: 1;
+        }
+        
+        .chat-name, .friend-name, .notification-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+            color: var(--text-primary);
+        }
+        
+        .last-message, .friend-status, .notification-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.2rem;
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .timestamp {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+        
+        .friend-item, .notification-item {
+            background-color: var(--bg-secondary);
+        }
+        
+        .friend-item::before {
+            background-color: var(--mario-green);
+        }
+        
+        .notification-item::before {
+            background-color: var(--mario-yellow);
+        }
+        
+        .unread-count {
+            background-color: var(--mario-red);
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+        
+        .friend-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .friend-action {
+            background-color: var(--mario-blue);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .friend-action:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .notification-time {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+        }
+        
+        .page-content {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+            padding: 0.5rem 0;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        .page-content::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--mario-red);
+            height: 80px;
+            display: flex;
+            box-shadow: 0 -3px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            padding: 0 1rem;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 20px 20px 0 0;
+            border-top: 6px solid var(--mario-dark-red);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            color: var(--mario-white);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem;
+            border-radius: 12px;
+        }
+        
+        .nav-item.active {
+            color: var(--mario-white);
+        }
+        
+        .nav-item .icon-bg {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.3rem;
+            transition: all 0.3s ease;
+            background-color: var(--mario-yellow);
+            border: 4px solid var(--mario-white);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .nav-item.active .icon-bg {
+            transform: translateY(-15px) scale(1.1);
+        }
+        
+        .nav-item i {
+            font-size: 1.5rem;
+            color: var(--mario-red);
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 0.3rem;
+        }
+        
+        .nav-item.active span {
+            font-weight: 800;
+        }
+        
+        .nav-item:hover .icon-bg {
+            animation: bounce 0.5s;
+        }
+        
+        /* 马里奥特有的装饰元素 */
+        .mario-cloud {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mario-cloud::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 10px;
+            background-color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+        }
+        
+        .mario-cloud::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            background-color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+        }
+        
+        /* 隐藏滚动条但保持滚动功能 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        html, body {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            overflow-y: scroll;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部状态栏 -->
+        <div class="status-bar">
+            <div class="status-bar-time">16:02</div>
+            <div class="status-bar-icons">
+                <i class="fas fa-signal"></i>
+                <span>5G</span>
+                <i class="fas fa-battery-half"></i>
+                <span>54%</span>
+            </div>
+        </div>
+        
+        <!-- 马里奥风格的装饰元素 -->
+        <div class="mario-cloud" style="top: 80px; right: 30px; animation: float 8s infinite;"></div>
+        <div class="mario-cloud" style="top: 120px; left: 50px; animation: float 10s infinite 1s;"></div>
+        
+        <!-- 顶部标题区域 -->
+        <div class="header-area">
+            <div class="flex justify-between items-center">
+                <a href="polyplay-b.html" class="back-button mr-4">
+                    <i class="fas fa-chevron-left text-white text-xl"></i>
+                </a>
+                <h1 class="app-title">消息中心</h1>
+                <button class="action-btn" style="background-color: var(--mario-yellow); width: 40px; height: 40px;">
+                    <i class="fas fa-bell text-red-600"></i>
+                </button>
+            </div>
+            
+            <!-- 标签栏 -->
+            <div class="tab-container">
+                <div class="tab active" id="chat-tab">聊天</div>
+                <div class="tab" id="friends-tab">好友</div>
+                <div class="tab" id="notifications-tab">通知</div>
+            </div>
+            
+            <!-- 搜索栏 -->
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="搜索消息和联系人">
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <!-- 聊天列表页 -->
+            <div class="page-content" id="chat-page">
+                <div class="chat-item">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/cQD4RZV.png" alt="马里奥">
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="chat-details">
+                        <div class="chat-name">小马哥</div>
+                        <div class="last-message">嘿，我们今天要一起玩海底世界吗？</div>
+                        <div class="timestamp">10:30 AM</div>
+                    </div>
+                    <div class="unread-count">3</div>
+                </div>
+                
+                <div class="chat-item">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/KJK8MKQ.png" alt="路易斯">
+                    </div>
+                    <div class="chat-details">
+                        <div class="chat-name">路易斯</div>
+                        <div class="last-message">昨天的游戏真好玩，下次再约！</div>
+                        <div class="timestamp">昨天</div>
+                    </div>
+                </div>
+                
+                <div class="chat-item">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/YWGHhxU.png" alt="桃子公主">
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="chat-details">
+                        <div class="chat-name">桃子公主</div>
+                        <div class="last-message">谢谢你帮我解救了城堡！🏰</div>
+                        <div class="timestamp">昨天</div>
+                    </div>
+                </div>
+                
+                <div class="chat-item">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/E6WYvSS.png" alt="耀西">
+                    </div>
+                    <div class="chat-details">
+                        <div class="chat-name">小耀西</div>
+                        <div class="last-message">你的新徽章真酷！我也想要一个</div>
+                        <div class="timestamp">周二</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 好友列表页 -->
+            <div class="page-content hidden" id="friends-page">
+                <div class="friend-item">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/cQD4RZV.png" alt="马里奥">
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="friend-details">
+                        <div class="friend-name">小马哥</div>
+                        <div class="friend-status">正在游戏中：海底探险</div>
+                    </div>
+                    <div class="friend-actions">
+                        <div class="friend-action" style="background-color: var(--mario-green);">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="friend-action">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="friend-item">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/KJK8MKQ.png" alt="路易斯">
+                    </div>
+                    <div class="friend-details">
+                        <div class="friend-name">路易斯</div>
+                        <div class="friend-status">最近在线：1小时前</div>
+                    </div>
+                    <div class="friend-actions">
+                        <div class="friend-action" style="background-color: var(--mario-green);">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="friend-action">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="friend-item">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/YWGHhxU.png" alt="桃子公主">
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="friend-details">
+                        <div class="friend-name">桃子公主</div>
+                        <div class="friend-status">正在游戏中：蘑菇王国</div>
+                    </div>
+                    <div class="friend-actions">
+                        <div class="friend-action" style="background-color: var(--mario-green);">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="friend-action">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 通知列表页 -->
+            <div class="page-content hidden" id="notifications-page">
+                <div class="notification-item" style="border-color: var(--mario-yellow);">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/8GDVU4D.png" alt="金币">
+                    </div>
+                    <div class="notification-details">
+                        <div class="notification-title">新成就解锁！</div>
+                        <div class="notification-text">你获得了"冒险家"成就和50金币奖励</div>
+                        <div class="notification-time">今天 09:45</div>
+                    </div>
+                </div>
+                
+                <div class="notification-item" style="border-color: var(--mario-yellow);">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/E6WYvSS.png" alt="耀西">
+                    </div>
+                    <div class="notification-details">
+                        <div class="notification-title">好友请求</div>
+                        <div class="notification-text">小耀西邀请你成为好友</div>
+                        <div class="notification-time">昨天</div>
+                    </div>
+                </div>
+                
+                <div class="notification-item" style="border-color: var(--mario-yellow);">
+                    <div class="avatar">
+                        <img src="https://i.imgur.com/Sk21U5K.png" alt="奖杯">
+                    </div>
+                    <div class="notification-details">
+                        <div class="notification-title">周末特别活动</div>
+                        <div class="notification-text">参加"蘑菇王国大冒险"赢取特别奖励！</div>
+                        <div class="notification-time">2天前</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部导航栏 - 马里奥风格 -->
+        <div class="bottom-nav flex justify-around items-center">
+            <a href="polyplay-b.html" class="nav-item">
+                <div class="icon-bg">
+                    <i class="fas fa-home"></i>
+                </div>
+                <span>HOME</span>
+            </a>
+            <a href="#" class="nav-item">
+                <div class="icon-bg">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <span>排行榜</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <div class="icon-bg">
+                    <i class="fas fa-comment"></i>
+                </div>
+                <span>聊天</span>
+            </a>
+            <a href="#" class="nav-item">
+                <div class="icon-bg">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span>我的</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatTab = document.getElementById('chat-tab');
+            const friendsTab = document.getElementById('friends-tab');
+            const notificationsTab = document.getElementById('notifications-tab');
+            
+            const chatPage = document.getElementById('chat-page');
+            const friendsPage = document.getElementById('friends-page');
+            const notificationsPage = document.getElementById('notifications-page');
+            
+            // 标签切换功能
+            chatTab.addEventListener('click', function() {
+                setActiveTab(chatTab, chatPage);
+            });
+            
+            friendsTab.addEventListener('click', function() {
+                setActiveTab(friendsTab, friendsPage);
+            });
+            
+            notificationsTab.addEventListener('click', function() {
+                setActiveTab(notificationsTab, notificationsPage);
+            });
+            
+            function setActiveTab(activeTab, activePage) {
+                // 移除所有标签的active类
+                chatTab.classList.remove('active');
+                friendsTab.classList.remove('active');
+                notificationsTab.classList.remove('active');
+                
+                // 给当前标签添加active类
+                activeTab.classList.add('active');
+                
+                // 隐藏所有页面
+                chatPage.classList.add('hidden');
+                friendsPage.classList.add('hidden');
+                notificationsPage.classList.add('hidden');
+                
+                // 显示当前页面
+                activePage.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html> 
